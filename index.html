@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Buzón de Escucha - TVN Media</title>
+    
+    <!-- Fuentes de Google de alta calidad -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos de FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Tailwind CSS para diseño moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tvn: {
+                            blue: '#0c4cb4',
+                            blueDark: '#083680',
+                            teal: '#0fa1a1',
+                            tealDark: '#0b7676',
+                            coral: '#ff7a60',
+                            coralDark: '#d9533c',
+                            lightBg: '#f8fafc',
+                            cardBg: '#ffffff',
+                            textDark: '#0f172a',
+                            textMuted: '#475569'
+                        }
+                    },
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                        lato: ['Lato', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            background-color: #f1f5f9;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .bg-waves-light {
+            background-image: radial-gradient(circle at 100% 0%, rgba(15, 161, 161, 0.05) 0%, transparent 40%),
+                              radial-gradient(circle at 0% 100%, rgba(12, 76, 180, 0.05) 0%, transparent 50%);
+        }
+
+        /* Estilo de selección activa para tarjetas */
+        .option-card input:checked + div {
+            border-color: #0fa1a1;
+            background-color: rgba(15, 161, 161, 0.06);
+        }
+
+        /* El círculo de selección ahora sí se rellena de color al marcar la opción,
+           para confirmar visualmente que el clic quedó registrado */
+        .option-card input:checked + div .check-icon {
+            background-color: #0fa1a1;
+            border-color: #0fa1a1;
+        }
+
+        /* Contenedor principal anclado a los bordes reales de la pantalla visible en móvil,
+           evita que la barra del navegador (Chrome, Safari, etc.) tape el contenido */
+        #app-main {
+            position: fixed;
+            inset: 0;
+        }
+        @media (min-width: 768px) {
+            #app-main {
+                position: static;
+                height: 844px;
+            }
+        }
+    </style>
+</head>
+<body class="font-lato min-h-screen text-tvn-textDark flex flex-col items-center justify-center overflow-hidden">
+
+    <main id="app-main" class="w-full max-w-md md:my-4 md:rounded-[40px] md:shadow-[0_24px_50px_rgba(15,23,42,0.15)] md:border-8 md:border-slate-850 bg-tvn-lightBg flex flex-col justify-between overflow-hidden md:relative">
+        
+        <!-- Cabecera Institucional Oficial (Alto Contraste) -->
+        <header class="bg-gradient-to-r from-tvn-blue to-tvn-blueDark text-white px-5 pt-8 pb-5 rounded-b-[28px] shadow-md flex flex-col gap-2.5 z-20">
+            <div class="flex justify-between items-center">
+                <div>
+                    <span class="text-[9px] font-poppins font-extrabold tracking-widest text-tvn-teal uppercase">
+                        Recursos Humanos | Escucha Activa
+                    </span>
+                    <h1 class="text-2xl font-poppins font-extrabold leading-none mt-1">BUZÓN DE ESCUCHA</h1>
+                </div>
+                <div class="bg-white/10 p-2.5 rounded-xl border border-white/15">
+                    <i class="fa-solid fa-comments-text text-tvn-teal text-lg"></i>
+                </div>
+            </div>
+            
+            <div class="border-t border-white/10 pt-2 flex items-center gap-2">
+                <span class="bg-tvn-coral text-white text-[9px] font-bold py-0.5 px-2.5 rounded-full uppercase tracking-wider">
+                    Campaña Oficial
+                </span>
+                <span class="text-[10px] text-slate-100 font-bold italic">
+                    "Tu voz nos ayuda a cuidarnos entre todos"
+                </span>
+            </div>
+        </header>
+
+        <!-- Contenido de Pantallas (Scrollable) -->
+        <section class="flex-grow overflow-y-auto no-scrollbar px-5 py-5 pb-10 z-10 bg-waves-light">
+            
+            <form id="pilot-feedback-form" action="https://formspree.io/f/maqrenwe" method="POST" onsubmit="handleSubmit(event)" class="space-y-5">
+                
+                <!-- PANTALLA 1: PREGUNTA FILTRO INICIAL -->
+                <div id="step-filter" class="space-y-5">
+                    <div class="bg-tvn-teal/10 border border-tvn-teal/30 p-4 rounded-2xl flex gap-3 shadow-sm">
+                        <span class="text-tvn-tealDark text-lg pt-0.5"><i class="fa-solid fa-user-shield"></i></span>
+                        <p class="text-[13px] text-tvn-tealDark font-bold leading-relaxed">
+                            Este buzón de escucha es 100% anónimo y privado. Tu opinión honesta sirve para evaluar el impacto de este piloto en el canal.
+                        </p>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-4">
+                    <label class="block text-[13px] font-poppins font-extrabold text-tvn-blue uppercase tracking-wider leading-relaxed">
+                        1. ¿Conoces la actual campaña de Recursos Humanos "Cuidarnos también es parte del trabajo"?
+                    </label>
+                    
+                    <div class="space-y-3 pt-1">
+                            <!-- Opción Sí -->
+                            <label class="option-card block cursor-pointer">
+                                <input type="radio" name="knows_campaign" value="si" class="sr-only" required onchange="handleFilterSelection('si')">
+                                <div class="p-3.5 rounded-xl border border-slate-200 hover:border-tvn-teal flex items-center gap-3 transition-all">
+                                    <span class="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center text-[10px] text-white bg-white check-icon transition-colors">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                    <span class="text-[13px] text-tvn-textDark font-bold">Sí, la conozco</span>
+                                </div>
+                            </label>
+
+                            <!-- Opción No -->
+                            <label class="option-card block cursor-pointer">
+                                <input type="radio" name="knows_campaign" value="no" class="sr-only" onchange="handleFilterSelection('no')">
+                                <div class="p-3.5 rounded-xl border border-slate-200 hover:border-tvn-teal flex items-center gap-3 transition-all">
+                                    <span class="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center text-[10px] text-white bg-white check-icon transition-colors">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                    <span class="text-[13px] text-tvn-textDark font-bold">No, no la conozco aún</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANTALLA 2A: CAMINO "NO" (Explicación y Cierre) -->
+                <div id="step-no-campaign" class="hidden space-y-5">
+                    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-5 text-center">
+                        <div class="text-tvn-blue flex flex-col items-center justify-center mx-auto gap-1">
+                            <i class="fa-solid fa-circle-arrow-down text-4xl animate-bounce text-tvn-teal"></i>
+                            <span class="text-[10px] font-poppins font-extrabold text-tvn-blue uppercase tracking-widest mt-1">Sigue leyendo abajo</span>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <h3 class="font-poppins font-extrabold text-[14px] text-tvn-blue uppercase tracking-wide">
+                                ¡Te la presentamos brevemente!
+                            </h3>
+                            <p class="text-[13px] text-tvn-textMuted leading-relaxed">
+                                Es una iniciativa interna de <strong class="text-tvn-textDark">Recursos Humanos</strong> para promover el autocuidado físico y mental dentro de tu jornada laboral diaria en <strong>TVN Media</strong>. 
+                            </p>
+                        </div>
+
+                        <!-- Mini Tarjeta de Beneficio -->
+                        <div class="bg-slate-50 border border-slate-100 p-4 rounded-xl text-left space-y-2">
+                            <h4 class="text-[11px] font-poppins font-extrabold text-tvn-teal uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-play"></i> Nuestra herramienta principal:
+                            </h4>
+                            <p class="text-[13px] text-tvn-textMuted leading-relaxed">
+                                Contamos con una <strong class="text-tvn-textDark">Pausa Activa Interactiva de 3 minutos</strong> que puedes realizar desde tu teléfono móvil para estirar, liberar rigidez en hombros o relajar la mente antes de continuar.
+                            </p>
+                        </div>
+
+                        <div class="bg-tvn-coral/10 border border-tvn-coral/30 p-3.5 rounded-xl">
+                            <p class="text-[12px] text-tvn-coralDark font-bold leading-normal">
+                                Al presionar "Finalizar y Enviar" tu respuesta quedará registrada de forma anónima para medir el alcance inicial del piloto. ¡Gracias por ayudarnos!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Botón para finalizar el formulario del NO -->
+                    <button type="submit" class="w-full bg-tvn-blue hover:bg-tvn-blueDark active:scale-95 text-white font-poppins font-bold py-4 px-6 rounded-2xl shadow-md transition-all flex justify-center items-center gap-2 text-[13px]">
+                        <i class="fa-solid fa-paper-plane"></i> Finalizar y Enviar
+                    </button>
+                </div>
+
+                <!-- PANTALLA 2B: CAMINO "SÍ" (Preguntas detalladas del piloto) -->
+                <div id="step-yes-campaign" class="hidden space-y-5">
+                    
+                    <!-- Pregunta 2: Uso de la Pausa Activa -->
+                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-3">
+                        <label class="block text-[13px] font-poppins font-extrabold text-tvn-blue uppercase tracking-wider leading-relaxed">
+                            2. ¿Has utilizado nuestra herramienta de Pausa Activa Interactiva en tu módulo?
+                        </label>
+                        
+                        <div class="space-y-2.5 pt-1">
+                            <label class="option-card block cursor-pointer">
+                                <input type="radio" name="used_pausa" value="si_util" class="sr-only">
+                                <div class="p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                                    <span class="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[8px] text-white bg-white check-icon transition-colors">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                    <span class="text-[13px] text-tvn-textDark font-medium">Sí, y me ha ayudado a relajarme o recargar energía</span>
+                                </div>
+                            </label>
+
+                            <label class="option-card block cursor-pointer">
+                                <input type="radio" name="used_pausa" value="si_poco" class="sr-only">
+                                <div class="p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                                    <span class="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[8px] text-white bg-white check-icon transition-colors">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                    <span class="text-[13px] text-tvn-textDark font-medium">Sí, pero aún requiero más días para notar su utilidad</span>
+                                </div>
+                            </label>
+
+                            <label class="option-card block cursor-pointer">
+                                <input type="radio" name="used_pausa" value="no" class="sr-only">
+                                <div class="p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                                    <span class="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[8px] text-white bg-white check-icon transition-colors">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                    <span class="text-[13px] text-tvn-textDark font-medium">No la he utilizado todavía</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Pregunta 3: Gestión del estrés / Destino -->
+                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-3">
+                        <label class="block text-[13px] font-poppins font-extrabold text-tvn-blue uppercase tracking-wider leading-relaxed">
+                            3. En momentos de alta tensión o sobrecarga laboral, ¿a dónde te diriges o qué sueles hacer usualmente?
+                        </label>
+                        
+                        <div class="space-y-2.5 pt-1">
+                            <label class="option-card block cursor-pointer">
+                                <input type="radio" name="where_to_go" value="lider" class="sr-only">
+                                <div class="p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                                    <span class="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[8px] text-white bg-white check-icon transition-colors">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                    <span class="text-[13px] text-tvn-textDark font-medium">Converso o lo gestiono directamente con mi líder inmediato</span>
+                                </div>
+                            </label>
+
+                            <label class="option-card block cursor-pointer">
+                                <input type="radio" name="where_to_go" value="rrhh" class="sr-only">
+                                <div class="p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                                    <span class="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[8px] text-white bg-white check-icon transition-colors">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                    <span class="text-[13px] text-tvn-textDark font-medium">Acudo de manera confidencial a Recursos Humanos</span>
+                                </div>
+                            </label>
+
+                            <label class="option-card block cursor-pointer">
+                                <input type="radio" name="where_to_go" value="personal" class="sr-only">
+                                <div class="p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                                    <span class="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[8px] text-white bg-white check-icon transition-colors">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                    <span class="text-[13px] text-tvn-textDark font-medium">Suelo manejarlo de manera personal (lo guardo para mí)</span>
+                                </div>
+                            </label>
+
+                            <label class="option-card block cursor-pointer">
+                                <input type="radio" name="where_to_go" value="no_se" class="sr-only">
+                                <div class="p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                                    <span class="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[8px] text-white bg-white check-icon transition-colors">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                    <span class="text-[13px] text-tvn-textDark font-medium">No sé a quién acudir o con quién hablar en el canal</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Pregunta 4: Deseo de más actividades -->
+                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-3">
+                        <label class="block text-[13px] font-poppins font-extrabold text-tvn-blue uppercase tracking-wider leading-relaxed">
+                            4. ¿Te gustaría que Recursos Humanos implemente más actividades o iniciativas interactivas similares?
+                        </label>
+                        
+                        <div class="space-y-2.5 pt-1">
+                            <label class="option-card block cursor-pointer">
+                                <input type="radio" name="more_activities" value="si" class="sr-only">
+                                <div class="p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                                    <span class="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[8px] text-white bg-white check-icon transition-colors">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                    <span class="text-[13px] text-tvn-textDark font-medium">Sí, definitivamente hacen falta estos espacios</span>
+                                </div>
+                            </label>
+
+                            <label class="option-card block cursor-pointer">
+                                <input type="radio" name="more_activities" value="tal_vez" class="sr-only">
+                                <div class="p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                                    <span class="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[8px] text-white bg-white check-icon transition-colors">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                    <span class="text-[13px] text-tvn-textDark font-medium">Tal vez, dependiendo del tiempo de la jornada</span>
+                                </div>
+                            </label>
+
+                            <label class="option-card block cursor-pointer">
+                                <input type="radio" name="more_activities" value="no" class="sr-only">
+                                <div class="p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                                    <span class="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[8px] text-white bg-white check-icon transition-colors">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                    <span class="text-[13px] text-tvn-textDark font-medium">No, prefiero mantener mis jornadas habituales sin pausas</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Pregunta 5: Buzón libre / Sugerencias directas para RRHH -->
+                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-3">
+                        <label class="block text-[13px] font-poppins font-extrabold text-tvn-blue uppercase tracking-wider leading-relaxed">
+                            5. Buzón Abierto Confidencial
+                        </label>
+                        <p class="text-[12px] text-tvn-textMuted leading-relaxed">
+                            ¿Qué sugerencia o comentario tienes sobre la tensión laboral en el canal? Este es tu espacio seguro para alertar a Recursos Humanos.
+                        </p>
+                        <textarea name="anonymous_message" rows="4" maxlength="500" placeholder="Escribe aquí tu idea, descargo o sugerencia con total confianza..." class="w-full text-[13px] p-3.5 rounded-xl border border-slate-300 focus:ring-1 focus:ring-tvn-teal focus:border-tvn-teal bg-slate-50 text-tvn-textDark" required></textarea>
+                    </div>
+
+                    <!-- Botón para finalizar el formulario del SÍ -->
+                    <button type="submit" class="w-full bg-tvn-teal hover:bg-tvn-teal/90 active:scale-95 text-white font-poppins font-bold py-4 px-6 rounded-2xl shadow-md transition-all flex justify-center items-center gap-2 text-[13px]">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar Comentarios de Forma Anónima
+                    </button>
+
+                </div>
+
+            </form>
+
+            <!-- Aviso de envío en curso -->
+            <div id="sending-notice" class="hidden text-center py-8 space-y-4">
+                <i class="fa-solid fa-spinner fa-spin text-3xl text-tvn-teal"></i>
+                <p class="text-sm text-tvn-textMuted">Enviando tu respuesta de forma anónima...</p>
+            </div>
+
+            <!-- Aviso de error de envío -->
+            <div id="error-notice" class="hidden text-center py-8 space-y-4">
+                <i class="fa-solid fa-triangle-exclamation text-3xl text-tvn-coral"></i>
+                <p class="text-sm text-tvn-textMuted px-4">Hubo un problema al enviar tu respuesta. Por favor verifica tu conexión e inténtalo de nuevo.</p>
+                <button onclick="retrySubmit()" class="inline-block bg-tvn-blue hover:bg-tvn-blueDark active:scale-95 text-white font-poppins font-bold py-3 px-6 rounded-xl text-xs transition-all shadow-sm">
+                    Intentar de nuevo
+                </button>
+            </div>
+
+            <!-- PANTALLA 3: AGRADECIMIENTO (Oculta por defecto) -->
+            <div id="thanks-container" class="hidden text-center py-8 space-y-6">
+                <div class="w-20 h-20 bg-tvn-teal/10 rounded-full flex items-center justify-center text-tvn-teal mx-auto shadow-sm">
+                    <i class="fa-solid fa-circle-check text-5xl"></i>
+                </div>
+                
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-poppins font-extrabold text-tvn-blue">¡Sugerencia Recibida!</h2>
+                    <p class="text-xs text-tvn-textMuted leading-relaxed px-4">
+                        Muchas gracias por completar este buzón piloto. Tus respuestas han sido enviadas directamente a Gestión de Personas de manera 100% confidencial y nos ayudarán a evaluar la viabilidad de la campaña en el canal.
+                    </p>
+                </div>
+
+                <!-- Placa de Campaña -->
+                <div class="bg-tvn-blue/5 p-5 rounded-3xl border border-tvn-blue/10 max-w-xs mx-auto space-y-2">
+                    <p class="text-[10px] text-tvn-textMuted font-bold uppercase tracking-wider">Campaña de Autocuidado 2026</p>
+                    <h4 class="font-poppins font-extrabold text-xs text-tvn-blue leading-tight uppercase">
+                        CUIDARNOS TAMBIÉN<br>
+                        ES PARTE DEL TRABAJO
+                    </h4>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="resetForm()" class="inline-block bg-tvn-textDark hover:bg-black active:scale-95 text-white font-poppins font-bold py-3 px-6 rounded-xl text-xs transition-all shadow-sm">
+                        Enviar otra respuesta
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Pie de Página Institucional -->
+        <footer class="bg-white border-t border-slate-200 px-5 py-3.5 text-center text-[10px] text-tvn-textMuted font-semibold z-30">
+            © 2026 TVN Media | Recursos Humanos
+        </footer>
+
+    </main>
+
+    <!-- PROGRAMACIÓN DE COMPORTAMIENTO INTERACTIVO -->
+    <script>
+        // Función para manejar la lógica de ramificación basada en la primera pregunta
+        function handleFilterSelection(value) {
+            const stepFilter = document.getElementById('step-filter');
+            const stepNoCampaign = document.getElementById('step-no-campaign');
+            const stepYesCampaign = document.getElementById('step-yes-campaign');
+            
+            // Primero, removemos los requerimientos de campos para evitar conflictos de validación
+            toggleRequiredFields(false);
+
+            if (value === 'si') {
+                // Si conoce la campaña, mostramos el paso de preguntas detalladas
+                stepYesCampaign.classList.remove('hidden');
+                stepNoCampaign.classList.add('hidden');
+                
+                // Marcamos los campos de la sección SÍ como obligatorios
+                toggleRequiredFields(true);
+            } else if (value === 'no') {
+                // Si no la conoce, mostramos directamente la bienvenida educativa
+                stepNoCampaign.classList.remove('hidden');
+                stepYesCampaign.classList.add('hidden');
+            }
+        }
+
+        // Activa/desactiva el atributo "required" en los radio buttons según el camino lógico
+        function toggleRequiredFields(enable) {
+            const yesInputs = document.querySelectorAll('#step-yes-campaign input[type="radio"], #step-yes-campaign textarea');
+            yesInputs.forEach(input => {
+                if (enable) {
+                    input.setAttribute('required', 'required');
+                } else {
+                    input.removeAttribute('required');
+                }
+            });
+        }
+
+        // Manejar el submit del formulario enviando los datos reales a Formspree
+        function handleSubmit(event) {
+            event.preventDefault();
+            submitForm();
+        }
+
+        function submitForm() {
+            const form = document.getElementById('pilot-feedback-form');
+            const sendingNotice = document.getElementById('sending-notice');
+            const errorNotice = document.getElementById('error-notice');
+            const thanksContainer = document.getElementById('thanks-container');
+
+            form.classList.add('hidden');
+            errorNotice.classList.add('hidden');
+            sendingNotice.classList.remove('hidden');
+
+            const data = new FormData(form);
+
+            fetch(form.action, {
+                method: form.method,
+                body: data,
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(response => {
+                sendingNotice.classList.add('hidden');
+                if (response.ok) {
+                    thanksContainer.classList.remove('hidden');
+                } else {
+                    errorNotice.classList.remove('hidden');
+                }
+            })
+            .catch(() => {
+                sendingNotice.classList.add('hidden');
+                errorNotice.classList.remove('hidden');
+            });
+        }
+
+        // Reintentar el envío tras un error de conexión
+        function retrySubmit() {
+            document.getElementById('pilot-feedback-form').classList.remove('hidden');
+            document.getElementById('error-notice').classList.add('hidden');
+            submitForm();
+        }
+
+        // Reiniciar el formulario
+        function resetForm() {
+            document.getElementById('pilot-feedback-form').reset();
+            
+            // Ocultamos todas las ramificaciones y mostramos solo el filtro inicial
+            document.getElementById('step-filter').classList.remove('hidden');
+            document.getElementById('step-no-campaign').classList.add('hidden');
+            document.getElementById('step-yes-campaign').classList.add('hidden');
+            
+            document.getElementById('pilot-feedback-form').classList.remove('hidden');
+            document.getElementById('thanks-container').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
